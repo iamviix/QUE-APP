@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Track Your Project · Que</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #07070f;
+    --surface: #0c0c1a;
+    --border:  #14142a;
+    --borderHi:#1c1c38;
+    --text:    #dcd8f2;
+    --muted:   #3d3d5a;
+    --dim:     #7777a0;
+    --gold:    #d4a44c;
+    --green:   #18d462;
+    --blue:    #4488ff;
+    --purple:  #9966ff;
+    --calm1:   #a8d8b9;
+    --calm2:   #7bc8a4;
+    --calm3:   #f5c97a;
+    --calm4:   #e8a96a;
+    --calm5:   #d4846a;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content:'';
+    position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:999;opacity:.5;
+  }
+  .glow { position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0; }
+  .glow.a { width:300px;height:300px;top:-80px;left:-60px;background:rgba(212,164,76,.07); }
+  .glow.b { width:220px;height:220px;bottom:10%;right:-60px;background:rgba(24,212,98,.04); }
+
+  .wrap {
+    position:relative;z-index:1;
+    max-width:480px;margin:0 auto;
+    padding:40px 20px 80px;
+    display:flex;flex-direction:column;align-items:flex-start;gap:0;
+  }
+
+  /* top bar */
+  .topbar {
+    width:100%;display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:40px;
+    animation: fadeUp .5s ease both;
+  }
+  .logo { display:flex;align-items:center;gap:8px;text-decoration:none; }
+  .diamond { width:8px;height:8px;background:var(--gold);transform:rotate(45deg); }
+  .logo-text { font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold); }
+  .back-link {
+    font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+    color:var(--dim);text-decoration:none;
+    border:1px solid var(--borderHi);padding:6px 12px;border-radius:5px;
+    transition:color .15s,border-color .15s;
+  }
+  .back-link:hover { color:var(--text);border-color:var(--dim); }
+
+  /* hero */
+  .hero { margin-bottom:32px;animation:fadeUp .5s ease .1s both; }
+  .hero h1 {
+    font-family:'Syne',sans-serif;font-size:26px;font-weight:800;
+    color:var(--text);letter-spacing:-1px;margin-bottom:10px;line-height:1.1;
+  }
+  .hero h1 span { color:var(--gold); }
+  .hero p {
+    font-family:'DM Sans',sans-serif;font-size:13px;
+    color:var(--dim);line-height:1.7;
+  }
+
+  /* input section */
+  .input-wrap { width:100%;animation:fadeUp .5s ease .18s both; }
+
+  .toggle-row {
+    display:flex;gap:0;margin-bottom:16px;
+    background:#09091a;border:1px solid var(--border);border-radius:8px;padding:3px;
+  }
+  .toggle-btn {
+    flex:1;padding:9px 12px;border:1px solid transparent;border-radius:6px;
+    background:transparent;color:var(--dim);
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;
+    letter-spacing:.5px;cursor:pointer;transition:all .18s;
+  }
+  .toggle-btn.active {
+    background:rgba(212,164,76,.15);
+    border-color:rgba(212,164,76,.4);
+    color:var(--gold);
+  }
+
+  .field-wrap { position:relative;margin-bottom:12px; }
+  .field-label {
+    display:block;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--dim);margin-bottom:6px;
+  }
+  .field-input {
+    width:100%;background:#0a0a18;
+    border:1px solid var(--borderHi);border-radius:8px;
+    color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:14px;
+    padding:13px 16px;outline:none;transition:border-color .15s;
+  }
+  .field-input:focus { border-color:var(--gold); }
+  .field-input::placeholder { color:var(--muted); }
+
+  .find-btn {
+    width:100%;padding:16px 24px;
+    background:var(--gold);color:#06060f;
+    font-family:'Syne',sans-serif;font-size:14px;font-weight:800;
+    border:none;border-radius:10px;cursor:pointer;letter-spacing:.3px;
+    transition:all .2s;position:relative;overflow:hidden;
+  }
+  .find-btn:hover { transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,164,76,.3); }
+  .find-btn:active { transform:none; }
+  .find-btn:disabled { opacity:.4;cursor:not-allowed;transform:none;box-shadow:none; }
+
+  .error-msg {
+    font-family:'DM Sans',sans-serif;font-size:11px;color:#ff8080;
+    margin-top:10px;line-height:1.6;display:none;
+  }
+  .error-msg.show { display:block; }
+
+  /* divider */
+  .divider { width:100%;height:1px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.2;margin:28px 0; }
+
+  /* results */
+  #results { width:100%; }
+
+  .result-header {
+    margin-bottom:20px;animation:fadeUp .4s ease both;
+  }
+  .result-header .greeting {
+    font-family:'Syne',sans-serif;font-size:18px;font-weight:700;
+    color:var(--text);margin-bottom:4px;
+  }
+  .result-header .sub {
+    font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);
+  }
+
+  /* project card */
+  .project-card {
+    background:var(--surface);
+    border:1px solid var(--borderHi);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+    animation:fadeUp .4s ease both;
+  }
+
+  .proj-title-row {
+    display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  }
+  .proj-icon { font-size:20px;flex-shrink:0; }
+  .proj-name {
+    font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+    color:var(--text);
+  }
+  .proj-dates {
+    font-family:'DM Sans',sans-serif;font-size:9px;color:var(--dim);margin-top:2px;
+  }
+
+  /* Stage dots */
+  .stage-dots {
+    display:flex;align-items:center;gap:5px;margin-bottom:16px;
+  }
+  .stage-dot {
+    width:8px;height:8px;border-radius:50%;
+    background:#0a0a14;border:2px solid #1a1a2a;
+    transition:all .4s;flex-shrink:0;
+  }
+  .stage-dot.done  { background:var(--dot-color,var(--green));border-color:var(--dot-color,var(--green)); }
+  .stage-dot.curr  { background:var(--dot-color,var(--green));border-color:var(--dot-color,var(--green));box-shadow:0 0 8px var(--dot-color,var(--green)); }
+  .stage-connector {
+    flex:1;height:1px;
+    background:var(--conn-color,#1a1a2a);
+    transition:background .6s;
+  }
+  .stage-label-row {
+    display:flex;justify-content:space-between;margin-bottom:12px;
+  }
+  .stage-lbl {
+    font-family:'DM Sans',sans-serif;font-size:8px;
+    color:var(--dim);text-align:center;flex:1;
+  }
+  .stage-lbl.active { color:var(--prog-color,var(--green)); }
+
+  /* progress bar */
+  .prog-track {
+    background:#0e121a;border-radius:8px;height:8px;overflow:hidden;
+    position:relative;margin-bottom:8px;
+  }
+  .prog-fill {
+    height:100%;border-radius:8px;
+    transition:width 1.4s cubic-bezier(.16,1,.3,1);
+    position:relative;overflow:hidden;
+  }
+  .prog-shimmer {
+    position:absolute;top:0;bottom:0;width:40%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+    animation:shimmer 2.2s infinite;
+  }
+  .prog-meta {
+    display:flex;justify-content:space-between;
+    font-size:9px;color:var(--dim);margin-bottom:14px;
+  }
+  .prog-pct { font-weight:600; }
+
+  /* status message */
+  .status-msg {
+    font-family:'DM Sans',sans-serif;font-size:12px;
+    line-height:1.6;margin-bottom:6px;
+  }
+  .status-note {
+    font-family:'DM Sans',sans-serif;font-size:10px;
+    color:var(--dim);
+  }
+
+  /* delivery button */
+  .delivery-btn {
+    width:100%;margin-top:16px;
+    display:flex;align-items:center;gap:14px;
+    padding:16px 18px;border-radius:12px;
+    border:2px solid var(--borderHi);
+    background:#09090f;
+    cursor:not-allowed;transition:all .3s;
+    text-decoration:none;
+  }
+  .delivery-btn.unlocked {
+    border-color:rgba(24,212,98,.5);
+    background:#030e07;cursor:pointer;
+    animation:unlockPulse 2.5s ease 1;
+  }
+  .delivery-btn.unlocked:hover {
+    background:#071808;
+    border-color:var(--green);
+    transform:translateY(-2px);
+    box-shadow:0 8px 28px rgba(24,212,98,.2);
+  }
+  .delivery-icon {
+    width:40px;height:40px;border-radius:50%;
+    border:2px solid var(--borderHi);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;flex-shrink:0;transition:all .3s;
+  }
+  .delivery-btn.unlocked .delivery-icon {
+    border-color:rgba(24,212,98,.4);background:rgba(24,212,98,.1);
+  }
+  .delivery-text-wrap { flex:1; }
+  .delivery-title {
+    font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+    color:#2a2a3a;margin-bottom:2px;transition:color .3s;
+  }
+  .delivery-btn.unlocked .delivery-title { color:var(--green); }
+  .delivery-sub {
+    font-family:'DM Sans',sans-serif;font-size:9px;
+    color:#2a2a3a;transition:color .3s;
+  }
+  .delivery-btn.unlocked .delivery-sub { color:rgba(24,212,98,.5); }
+
+  /* complete state */
+  .complete-state {
+    background:#030e07;border:1px solid rgba(24,212,98,.3);
+    border-radius:14px;padding:28px;text-align:center;
+    animation:fadeUp .4s ease both;
+  }
+  .check-icon {
+    font-size:40px;margin-bottom:12px;
+    animation:checkPop .5s cubic-bezier(.16,1,.3,1) both;
+  }
+  .complete-title {
+    font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+    color:var(--green);margin-bottom:8px;
+  }
+  .complete-sub {
+    font-family:'DM Sans',sans-serif;font-size:12px;
+    color:rgba(24,212,98,.5);line-height:1.6;
+  }
+
+  /* no projects */
+  .empty-state {
+    background:var(--surface);border:1px dashed var(--border);
+    border-radius:14px;padding:40px 24px;text-align:center;
+  }
+  .empty-icon { font-size:28px;margin-bottom:12px;opacity:.5; }
+  .empty-title {
+    font-family:'Syne',sans-serif;font-size:14px;font-weight:700;
+    color:var(--dim);margin-bottom:6px;
+  }
+  .empty-sub {
+    font-family:'DM Sans',sans-serif;font-size:11px;
+    color:var(--muted);line-height:1.6;
+  }
+
+  /* footer */
+  .footer {
+    width:100%;margin-top:36px;
+    display:flex;align-items:center;justify-content:space-between;
+    animation:fadeUp .5s ease .3s both;
+  }
+  .footer-brand { display:flex;align-items:center;gap:6px; }
+  .footer-d { width:5px;height:5px;background:var(--gold);transform:rotate(45deg);opacity:.4; }
+  .footer-name { font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--muted); }
+  .footer-ig {
+    font-size:8px;color:var(--muted);text-decoration:none;letter-spacing:.5px;
+    transition:color .15s;
+  }
+  .footer-ig:hover { color:var(--dim); }
+
+  /* animations */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+  @keyframes shimmer { 0%{left:-100%} 100%{left:200%} }
+  @keyframes checkPop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 70%{transform:scale(1.2) rotate(4deg);opacity:1} 100%{transform:scale(1) rotate(0);opacity:1} }
+  @keyframes unlockPulse { 0%,100%{box-shadow:0 0 0 0 rgba(24,212,98,.4)} 60%{box-shadow:0 0 0 12px rgba(24,212,98,0)} }
+  @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+
+  .spinner {
+    width:18px;height:18px;border-radius:50%;
+    border:2px solid rgba(6,6,15,.3);
+    border-top-color:#06060f;
+    animation:spin .7s linear infinite;
+    display:inline-block;vertical-align:middle;margin-right:8px;
+  }
+</style>
+</head>
+<body>
+<div class="glow a"></div>
+<div class="glow b"></div>
+
+<div class="wrap">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <a class="logo" href="https://instagram.com/alphabetfilms" target="_blank">
+      <div class="diamond"></div>
+      <span class="logo-text">Que</span>
+    </a>
+    <a class="back-link" href="https://instagram.com/alphabetfilms" target="_blank">@alphabetfilms ↗</a>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Track your<br/><span>project.</span></h1>
+    <p>Enter the email or phone number you booked with and we'll pull up your project status instantly.</p>
+  </div>
+
+  <!-- Input -->
+  <div class="input-wrap">
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="btn-email" onclick="switchMode('email')">✉ Email</button>
+      <button class="toggle-btn" id="btn-phone" onclick="switchMode('phone')">☎ Phone</button>
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label" id="field-label">Your email address</label>
+      <input class="field-input" id="lookup-input" type="email"
+        placeholder="you@example.com"
+        onkeydown="if(event.key==='Enter') findProject()"
+        autocomplete="email" autocapitalize="none" spellcheck="false"/>
+    </div>
+
+    <button class="find-btn" id="find-btn" onclick="findProject()">
+      Find My Project
+    </button>
+
+    <div class="error-msg" id="error-msg">
+      No project found for that detail. Double-check your spelling, or contact us at
+      <a href="https://instagram.com/alphabetfilms" target="_blank" style="color:var(--gold)">@alphabetfilms</a>.
+    </div>
+  </div>
+
+  <div class="divider" id="divider" style="display:none"></div>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">
+      <div class="footer-d"></div>
+      <span class="footer-name">Que</span>
+    </div>
+    <a class="footer-ig" href="https://instagram.com/alphabetfilms" target="_blank">instagram.com/alphabetfilms ↗</a>
+  </div>
+
+</div>
+
+<script>
+// ── Shared storage keys (same as Que app) ──────────────────────────────────
+const CLIENTS_KEY = "q:clients";
+const JOBS_KEY    = "q:jobs";
+
+// ── Stage definitions ───────────────────────────────────────────────────────
+const STAGES = [
+  { id:"uploading", label:"Files",     color:"#4488ff" },
+  { id:"working",   label:"Working",   color:"#f0c060" },
+  { id:"finishing", label:"Finishing", color:"#d4a44c" },
+  { id:"delivered", label:"Complete",  color:"#18d462" },
+];
+
+const SVC_ICON = {
+  "Wedding Film":"🎞","Music Video":"🎬","Brand / Commercial":"📡",
+  "Event Coverage":"📹","Photo Shoot":"📷","Reel / Short Form":"▶","Documentary":"🎥",
+};
+
+const fmt = (d) => d ? new Date(d).toLocaleDateString("en-US",{month:"short",day:"numeric"}) : "";
+
+const addDays = (ds, n) => {
+  const d = new Date(ds); d.setDate(d.getDate()+n);
+  return d.toISOString().split("T")[0];
+};
+
+const TODAY       = new Date().toISOString().split("T")[0];
+const TODAY_IDX   = 4;
+const ORIGIN      = addDays(TODAY, -TODAY_IDX);
+const dayOff      = (ds) => Math.round((new Date(ds) - new Date(ORIGIN)) / 86400000);
+
+const calmColor = (pct) => {
+  if (pct < 25) return "#a8d8b9";
+  if (pct < 50) return "#7bc8a4";
+  if (pct < 70) return "#f5c97a";
+  if (pct < 88) return "#e8a96a";
+  return "#d4846a";
+};
+
+// ── Mode toggle ─────────────────────────────────────────────────────────────
+let mode = "email";
+function switchMode(m) {
+  mode = m;
+  document.getElementById("btn-email").classList.toggle("active", m==="email");
+  document.getElementById("btn-phone").classList.toggle("active", m==="phone");
+  const inp = document.getElementById("lookup-input");
+  inp.type = m==="email" ? "email" : "tel";
+  inp.placeholder = m==="email" ? "you@example.com" : "555-0100";
+  inp.autocomplete = m==="email" ? "email" : "tel";
+  document.getElementById("field-label").textContent = m==="email" ? "Your email address" : "Your phone number";
+  inp.value = "";
+  clearResults();
+}
+
+function clearResults() {
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("divider").style.display = "none";
+  document.getElementById("error-msg").classList.remove("show");
+}
+
+// ── Storage (same API as Que app) ───────────────────────────────────────────
+async function sGet(key, fallback) {
+  try {
+    const r = await window.storage.get(key, true);
+    return r ? JSON.parse(r.value) : fallback;
+  } catch { return fallback; }
+}
+
+// ── Find project ─────────────────────────────────────────────────────────────
+async function findProject() {
+  const raw   = document.getElementById("lookup-input").value.trim();
+  const btn   = document.getElementById("find-btn");
+  const errEl = document.getElementById("error-msg");
+
+  if (!raw) return;
+  clearResults();
+
+  btn.innerHTML = '<span class="spinner"></span> Searching…';
+  btn.disabled = true;
+
+  const q = raw.toLowerCase().replace(/\s+/g,"");
+
+  const clients = await sGet(CLIENTS_KEY, []);
+  const jobs    = await sGet(JOBS_KEY, []);
+
+  btn.innerHTML = "Find My Project";
+  btn.disabled = false;
+
+  // match by email or phone (strip non-digits for phone)
+  const client = clients.find(c => {
+    if (mode === "email") return (c.email||"").toLowerCase() === raw.toLowerCase();
+    const ph = (c.phone||"").replace(/\D/g,"");
+    return ph === q.replace(/\D/g,"") && ph.length > 0;
+  });
+
+  if (!client) {
+    errEl.classList.add("show");
+    return;
+  }
+
+  const myJobs = jobs.filter(j => j.clientId === client.id)
+    .sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+
+  document.getElementById("divider").style.display = "block";
+  renderResults(client, myJobs);
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderResults(client, myJobs) {
+  const el = document.getElementById("results");
+  el.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "result-header";
+  header.innerHTML = `
+    <div class="greeting">Hey, ${client.name.split(" ")[0]} 👋</div>
+    <div class="sub">${myJobs.length} project${myJobs.length!==1?"s":""} found</div>
+  `;
+  el.appendChild(header);
+
+  if (myJobs.length === 0) {
+    el.innerHTML += `
+      <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <div class="empty-title">No active projects</div>
+        <div class="empty-sub">We'll reach out once yours is scheduled.<br/>Questions? DM <a href="https://instagram.com/alphabetfilms" style="color:var(--gold)">@alphabetfilms</a></div>
+      </div>`;
+    return;
+  }
+
+  myJobs.forEach((job, i) => {
+    const icon     = SVC_ICON[job.service] || "🎬";
+    const stageIdx = STAGES.findIndex(s => s.id === job.stage);
+    const s        = dayOff(job.startDate);
+    const e        = dayOff(job.endDate);
+    const span     = Math.max(e - s, 1);
+    const elapsed  = Math.min(100, Math.max(0, ((TODAY_IDX - s) / span) * 100));
+    const stagePct = job.stage === "delivered" ? 100 : Math.max(elapsed, (stageIdx / 3) * 100);
+    const color    = job.stage === "delivered" ? "#18d462" : calmColor(stagePct);
+    const daysLeft = Math.max(0, e - TODAY_IDX);
+
+    const stageMsg = {
+      uploading: "Your files are being received and organised",
+      working:   "Our team is actively working on your project",
+      finishing: "Final touches and quality checks underway",
+      delivered: "Your project is complete and ready to access",
+    }[job.stage] || "";
+
+    // Stage dots HTML
+    const dotsHTML = STAGES.map((st, si) => {
+      const done = stageIdx >= si;
+      const curr = stageIdx === si;
+      const dotClass = curr ? "stage-dot curr" : done ? "stage-dot done" : "stage-dot";
+      const connColor = stageIdx > si ? color + "50" : "#1a1a2a";
+      const dotStyle  = (done||curr) ? `--dot-color:${color}` : "";
+      return `
+        <div class="${dotClass}" style="${dotStyle}"></div>
+        ${si < STAGES.length-1 ? `<div class="stage-connector" style="background:${connColor}"></div>` : ""}
+      `;
+    }).join("");
+
+    const labelHTML = STAGES.map((st, si) => {
+      const active = stageIdx === si;
+      return `<span class="stage-lbl${active?" active":""}" style="${active?`--prog-color:${color}`:""}">
+        ${st.label}
+      </span>`;
+    }).join("");
+
+    // Delivery button
+    const unlocked = !!(job.deliveryLink && job.stage === "delivered");
+    const deliveryHTML = unlocked
+      ? `<a class="delivery-btn unlocked" href="${job.deliveryLink}" target="_blank" rel="noopener" onclick="markComplete(this)">
+          <div class="delivery-icon">✓</div>
+          <div class="delivery-text-wrap">
+            <div class="delivery-title">Access Your Files</div>
+            <div class="delivery-sub">Tap to open your completed project files</div>
+          </div>
+          <span style="color:var(--green);font-size:18px">›</span>
+        </a>`
+      : `<div class="delivery-btn">
+          <div class="delivery-icon">🔒</div>
+          <div class="delivery-text-wrap">
+            <div class="delivery-title">Awaiting Delivery</div>
+            <div class="delivery-sub">Your files will appear here once complete</div>
+          </div>
+        </div>`;
+
+    const shimmer = job.stage !== "delivered"
+      ? `<div class="prog-shimmer" style="position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);animation:shimmer 2.2s infinite"></div>`
+      : "";
+
+    const card = document.createElement("div");
+    card.className = "project-card";
+    card.style.animationDelay = `${i * 0.1}s`;
+    card.style.borderLeftColor = color;
+    card.style.borderLeftWidth = "3px";
+    card.innerHTML = `
+      <div class="proj-title-row">
+        <span class="proj-icon">${icon}</span>
+        <div>
+          <div class="proj-name">${job.service}</div>
+          <div class="proj-dates">${fmt(job.startDate)} → ${fmt(job.endDate)}</div>
+        </div>
+      </div>
+
+      <div class="stage-dots">${dotsHTML}</div>
+      <div class="stage-label-row">${labelHTML}</div>
+
+      <div class="prog-track">
+        <div class="prog-fill" style="width:${stagePct}%;background:linear-gradient(90deg,${color}60,${color});box-shadow:0 0 10px ${color}40">
+          ${shimmer}
+        </div>
+      </div>
+      <div class="prog-meta">
+        <span class="prog-pct" style="color:${color}">${job.stage==="delivered"?"Complete":Math.round(stagePct)+"% done"}</span>
+        <span>${job.stage==="delivered"?"Delivered ✓":daysLeft+" day"+( daysLeft!==1?"s":"")+" remaining"}</span>
+      </div>
+
+      <div class="status-msg" style="color:${color}">${stageMsg}</div>
+      ${job.notes ? `<div class="status-note">${job.notes}</div>` : ""}
+
+      ${deliveryHTML}
+    `;
+
+    el.appendChild(card);
+  });
+}
+
+function markComplete(el) {
+  // After a small delay, swap the card with a completion state
+  setTimeout(() => {
+    const card = el.closest(".project-card");
+    if (!card) return;
+    const existing = card.querySelector(".delivery-btn");
+    if (existing) {
+      existing.outerHTML = `
+        <div class="complete-state">
+          <div class="check-icon">✓</div>
+          <div class="complete-title">All done!</div>
+          <div class="complete-sub">Your files are on their way. Check your downloads or the link you just opened.</div>
+        </div>`;
+    }
+  }, 600);
+}
+</script>
+</body>
+</html>

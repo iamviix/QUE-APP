@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Que · Videography & Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #07070f;
+    --surface: #0c0c1a;
+    --border:  #14142a;
+    --borderHi:#1c1c38;
+    --text:    #dcd8f2;
+    --muted:   #3d3d5a;
+    --dim:     #7777a0;
+    --gold:    #d4a44c;
+    --amber:   #ffaa00;
+    --green:   #18d462;
+    --blue:    #4488ff;
+    --purple:  #9966ff;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Grain overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: .5;
+  }
+
+  /* ── Ambient glow ── */
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-orb.top  { width: 320px; height: 320px; top: -100px; left: -60px;  background: rgba(212,164,76,.07); }
+  .glow-orb.mid  { width: 260px; height: 260px; top: 40%;    right: -80px; background: rgba(153,102,255,.05);}
+  .glow-orb.bot  { width: 200px; height: 200px; bottom: -60px; left: 20%;  background: rgba(68,136,255,.04);}
+
+  /* ── Layout ── */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  /* ── Header ── */
+  .header {
+    width: 100%;
+    margin-bottom: 40px;
+    animation: slideIn .6s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .logo-diamond {
+    width: 9px; height: 9px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: -1px;
+  }
+
+  /* Avatar ring */
+  .avatar-wrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 18px;
+  }
+
+  .avatar-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold), var(--amber), var(--gold) 60%, transparent 60%);
+    animation: spinRing 8s linear infinite;
+  }
+
+  .avatar-inner {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: #12101a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .handle {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #9090b8;
+    max-width: 360px;
+    margin-bottom: 18px;
+  }
+
+  /* Tags */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 0;
+  }
+
+  .tag {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--borderHi);
+    color: var(--dim);
+    background: transparent;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    margin: 32px 0;
+    opacity: .3;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 8px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Link cards ── */
+  .links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .link-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--borderHi);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all .2s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .link-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent, var(--gold));
+    border-radius: 2px 0 0 2px;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .link-card:hover {
+    border-color: var(--accent, var(--gold));
+    transform: translateX(5px);
+    background: color-mix(in srgb, var(--accent, var(--gold)) 5%, var(--surface));
+  }
+
+  .link-card:hover::before { opacity: 1; }
+
+  .link-icon {
+    width: 40px; height: 40px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    background: color-mix(in srgb, var(--accent, var(--gold)) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, var(--gold)) 25%, transparent);
+  }
+
+  .link-body { flex: 1; min-width: 0; }
+
+  .link-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .link-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .link-arrow {
+    font-size: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: transform .2s, color .2s;
+  }
+  .link-card:hover .link-arrow { transform: translateX(3px); color: var(--accent, var(--gold)); }
+
+  /* ── Services grid ── */
+  .services {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .svc-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .2s;
+  }
+
+  .svc-chip:hover { border-color: var(--borderHi); }
+
+  .svc-emoji { font-size: 14px; }
+
+  .svc-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    color: var(--dim);
+  }
+
+  /* ── Stats row ── */
+  .stats {
+    width: 100%;
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--borderHi);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 16px 12px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .stat-lbl {
+    font-size: 7px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── CTA ── */
+  .cta-wrap {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 18px 24px;
+    background: var(--gold);
+    color: #06060f;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 12px;
+    text-decoration: none;
+    letter-spacing: .5px;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.15) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform .5s;
+  }
+
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(212,164,76,.3); }
+  .cta-btn:hover::after { transform: translateX(100%); }
+  .cta-btn:active { transform: translateY(0); }
+
+  /* ── Footer ── */
+  .footer {
+    width: 100%;
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-diamond {
+    width: 5px; height: 5px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    opacity: .5;
+  }
+
+  .footer-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .footer-tag {
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── Animations ── */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @keyframes spinRing {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes stagger {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .link-card { animation: stagger .5s cubic-bezier(.16,1,.3,1) both; }
+  .link-card:nth-child(1) { animation-delay: .1s; }
+  .link-card:nth-child(2) { animation-delay: .18s; }
+  .link-card:nth-child(3) { animation-delay: .26s; }
+  .link-card:nth-child(4) { animation-delay: .34s; }
+  .link-card:nth-child(5) { animation-delay: .42s; }
+
+  .svc-chip { animation: stagger .5s cubic-bezier(.16,1,.3,1) both; }
+  .svc-chip:nth-child(1) { animation-delay: .15s; }
+  .svc-chip:nth-child(2) { animation-delay: .2s; }
+  .svc-chip:nth-child(3) { animation-delay: .25s; }
+  .svc-chip:nth-child(4) { animation-delay: .3s; }
+  .svc-chip:nth-child(5) { animation-delay: .35s; }
+  .svc-chip:nth-child(6) { animation-delay: .4s; }
+  .svc-chip:nth-child(7) { animation-delay: .45s; }
+
+  .stats, .cta-btn { animation: stagger .6s cubic-bezier(.16,1,.3,1) .4s both; }
+
+  @media (max-width: 360px) {
+    .services { grid-template-columns: 1fr; }
+    .stats { flex-direction: column; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-orb top"></div>
+<div class="glow-orb mid"></div>
+<div class="glow-orb bot"></div>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-diamond"></div>
+      <span class="logo-text">Que</span>
+    </div>
+
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-inner">Q</div>
+    </div>
+
+    <div class="handle">@alphabetfilms</div>
+
+    <p class="bio">
+      Videography &amp; photography for brands, artists &amp; moments worth keeping.
+      Based everywhere. Delivered on time.
+    </p>
+
+    <div class="tags">
+      <span class="tag">Videography</span>
+      <span class="tag">Photography</span>
+      <span class="tag">Reels</span>
+      <span class="tag">Brand Content</span>
+      <span class="tag">Events</span>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div class="links">
+
+    <a class="link-card" href="que-track.html" style="--accent:#18d462">
+      <div class="link-icon">◈</div>
+      <div class="link-body">
+        <div class="link-title">Track Your Project</div>
+        <div class="link-sub">Check delivery status · Members &amp; single bookings</div>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Services -->
+  <div class="section-label" style="width:100%">Services</div>
+  <div class="services">
+    <div class="svc-chip"><span class="svc-emoji">▶</span><span class="svc-name">Reels / Short Form</span></div>
+    <div class="svc-chip"><span class="svc-emoji">📷</span><span class="svc-name">Photo Shoot</span></div>
+    <div class="svc-chip"><span class="svc-emoji">📹</span><span class="svc-name">Event Coverage</span></div>
+    <div class="svc-chip"><span class="svc-emoji">📡</span><span class="svc-name">Brand &amp; Commercial</span></div>
+    <div class="svc-chip"><span class="svc-emoji">🎬</span><span class="svc-name">Music Video</span></div>
+    <div class="svc-chip"><span class="svc-emoji">🎞</span><span class="svc-name">Wedding Film</span></div>
+    <div class="svc-chip"><span class="svc-emoji">🎥</span><span class="svc-name">Documentary</span></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">
+      <div class="footer-diamond"></div>
+      <span class="footer-name">Que</span>
+    </div>
+    <span class="footer-tag">Videography · Photography · Production</span>
+  </div>
+
+</div>
+</body>
+</html>
